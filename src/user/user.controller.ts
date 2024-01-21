@@ -4,7 +4,7 @@ import { RedisService } from "src/redis/redis.service";
 import { RegisterUserDto } from "./dto/register.dto";
 import { UserService } from "./user.service";
 
-@Controller("user")
+@Controller("api/v1/user")
 export class UserController {
   @Inject(EmailService)
   private emailService: EmailService;
