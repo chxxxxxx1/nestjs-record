@@ -1,9 +1,12 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
+import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { EmailModule } from "./email/email.module";
+import { LoginGuard } from "./login.guard";
 import { RedisModule } from "./redis/redis.module";
 import { Permission } from "./user/entities/permission.entitie";
 import { Role } from "./user/entities/role.entitie";
@@ -12,6 +15,18 @@ import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
+    JwtModule.registerAsync({
+      global: true,
+      useFactory(configService: ConfigService) {
+        return {
+          secret: configService.get("jwt_secret"),
+          signOptions: {
+            expiresIn: "30m",
+          },
+        };
+      },
+      inject: [ConfigService],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ["src/.env"],
@@ -43,6 +58,6 @@ import { UserModule } from "./user/user.module";
     EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: LoginGuard }],
 })
 export class AppModule {}
